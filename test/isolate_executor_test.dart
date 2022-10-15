@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
-import 'package:executors/src/executor.dart';
-import 'package:executors/src/isolate_executor.dart';
+import 'package:executor_lib/src/executor.dart';
+import 'package:executor_lib/src/isolate_executor.dart';
 
 void main() {
   var executor = IsolateExecutor();

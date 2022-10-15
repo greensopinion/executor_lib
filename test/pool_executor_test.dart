@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
-import 'package:executors/src/executor.dart';
-import 'package:executors/src/pool_executor.dart';
+import 'package:executor_lib/src/executor.dart';
+import 'package:executor_lib/src/pool_executor.dart';
 
 void main() {
   var executor = PoolExecutor(concurrency: 3);
