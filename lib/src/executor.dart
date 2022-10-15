@@ -34,7 +34,9 @@ class Job<Q, R> {
 abstract class Executor {
   Future<R> submit<Q, R>(Job<Q, R> job);
 
-  /// submits the given function and value to all isolates in the executor
+  /// submits the given function and value to all isolates in the executor,
+  /// useful for cases where state must be set up in isolates prior to executing
+  /// jobs
   List<Future<R>> submitAll<Q, R>(Job<Q, R> job);
 
   /// called when done, cancels any oustanding jobs

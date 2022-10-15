@@ -1,4 +1,4 @@
-Provides an abstraction for executing jobs.
+Provides an abstraction for executing jobs. Features include LIFO order execution, job deduplication, job cancellation, isolates, pooling and queueing.
 
 ## Overview
 
