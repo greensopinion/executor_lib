@@ -1,5 +1,33 @@
 Provides an abstraction for executing jobs.
 
+## Overview
+
+`Executor` abstraction enables creation of asynchronous jobs:
+
+```dart
+  Future payload(http.Response response) async => executor.submit(
+      Job('jsonDecode', jsonDecode, response.body, deduplicationKey: null));
+```
+
+Four different executors are provided:
+
+* `DirectExecutor` - Submits jobs directly to `scheduleMicrotask`.
+* `QueueExecutor` - Runs jobs on the UI thread one at a time using `scheduleMicrotask`. A queue of outstanding jobs is maintained in LIFO order so that newest jobs get run first.
+* `IsolateExecutor` - Runs jobs on an isolate one at a time. A queue of outstanding jobs is maintained in LIFO order so that newest jobs get run first.
+* `PoolExecutor` - Runs jobs on one or more `IsolateExecutor`s in round-robin fashion. Jobs have afinity with other jobs having the same `deduplicationKey`.
+
+### LIFO
+
+Jobs are started in LIFO order, meaning that the more recently submitted jobs are performed before older jobs. This helps with responsiveness of an app since usually jobs relate to user navigation within the app. By completing most recent jobs first, users see the result of what they asked for more quickly.
+
+### Deduplication
+
+Jobs may be scheduled to perform the same work more than once. By providing a deduplication key, the result of computing a value can be used to fulfill the result of multiple jobs, avoiding unnecessary work.
+
+### Cancellation
+
+Jobs can be cancelled after they are submitted. This is useful in cases where jobs are scheduled based on the need to display information that is no longer needed because the user navigates elsewhere in the UI. By cancelling jobs that have not yet started, unnecessary work is avoided.
+
 ## Background
 
 Originally developed as part of [vector_map_tiles](https://pub.dev/packages/vector_map_tiles)
