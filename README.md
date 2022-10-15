@@ -28,6 +28,14 @@ Jobs may be scheduled to perform the same work more than once. By providing a de
 
 Jobs can be cancelled after they are submitted. This is useful in cases where jobs are scheduled based on the need to display information that is no longer needed because the user navigates elsewhere in the UI. By cancelling jobs that have not yet started, unnecessary work is avoided.
 
+## Development
+
+### Continuous Integration
+
+CI with GitHub Actions:
+
+[![CI status](https://github.com/greensopinion/executor_lib/actions/workflows/CI.yaml/badge.svg)](https://github.com/greensopinion/executor_lib/actions)
+
 ## Background
 
 Originally developed as part of [vector_map_tiles](https://pub.dev/packages/vector_map_tiles)
