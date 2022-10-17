@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:test/test.dart';
 import 'package:executor_lib/src/executor.dart';
 import 'package:executor_lib/src/isolate_executor.dart';
@@ -69,6 +71,26 @@ void main() {
     });
   });
 
+  group('isolate naming:', () {
+    test('provides a name', () async {
+      final result = await executor
+          .submit(Job(_testJobName, _executorName, 1, deduplicationKey: null));
+      expect(RegExp(r'^executorService\d+$').hasMatch(result), true);
+    });
+    test('provides distinct names', () async {
+      var anotherExecutor = IsolateExecutor();
+      try {
+        final result = await executor.submit(
+            Job(_testJobName, _executorName, 1, deduplicationKey: null));
+        final anotherResult = await anotherExecutor.submit(
+            Job(_testJobName, _executorName, 1, deduplicationKey: null));
+        expect(result == anotherResult, false);
+      } finally {
+        anotherExecutor.dispose();
+      }
+    });
+  });
+
   group('submitAll tasks:', () {
     test('runs a task', () async {
       final result = executor
@@ -94,6 +116,16 @@ void main() {
       expect(longResult, [1000]);
       expect(firstShortResult, [1000]);
       expect(secondShortResult, [1000]);
+    });
+  });
+
+  group('reentrancy:', () {
+    test('executes a job that executes a job', () async {
+      final result = await _reentrantTask(4);
+      expect(result.length, 4);
+      expect(result.first, 'main');
+      final next = result[1];
+      expect(result.sublist(1), [next, next, next]);
     });
   });
 
@@ -140,3 +172,29 @@ dynamic _delayTask(dynamic value) async {
 }
 
 const _testJobName = 'test';
+IsolateExecutor? _isolateExecutor;
+
+Future<String> _executorName(dynamic any) async => Isolate.current.debugName!;
+
+Future<List<String>> _reentrantTask(int depth) async {
+  final nextDepth = depth - 1;
+  final value = [Isolate.current.debugName!];
+  if (nextDepth > 0) {
+    var created = false;
+    if (_isolateExecutor == null) {
+      created = true;
+      _isolateExecutor = IsolateExecutor();
+    }
+    try {
+      value.addAll(await _isolateExecutor!.submit(Job(
+          'reentrantTask', _reentrantTask, nextDepth,
+          deduplicationKey: null)));
+    } finally {
+      if (created) {
+        _isolateExecutor?.dispose();
+        _isolateExecutor = null;
+      }
+    }
+  }
+  return value;
+}

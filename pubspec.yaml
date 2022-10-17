@@ -1,6 +1,6 @@
 name: executor_lib
 description: Provides an abstraction for executing jobs.
-version: 0.1.1
+version: 0.2.1
 homepage: https://github.com/greensopinion/executor_lib
 
 environment:

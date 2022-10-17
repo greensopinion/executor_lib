@@ -7,26 +7,46 @@ import 'package:flutter/foundation.dart';
 import 'executor.dart';
 
 /// Runs jobs on a single isolate.
-class IsolateExecutor extends Executor {
+abstract class IsolateExecutor extends Executor {
+  var _disposed = false;
+
+  factory IsolateExecutor() =>
+      (_isWorker) ? _InlineExecutor() : _IsolateExecutor();
+
+  IsolateExecutor._();
+
+  @override
+  bool get disposed => _disposed;
+
+  @override
+  void dispose() {
+    _disposed = true;
+  }
+
+  bool hasJobWithDeduplicationKey(Job job) => false;
+
+  int get outstanding => 0;
+}
+
+class _IsolateExecutor extends IsolateExecutor {
   final _ready = Completer<bool>();
   bool _isReady = false;
   SendPort? _sendPort;
   StreamQueue<dynamic>? _stream;
-  var _disposed = false;
   final Map<String, _Job> _jobByKey = {};
   var _keySeed = 0;
   var _outstanding = 0;
   var _submitted = 0;
   final _queue = <_Job>[];
 
-  IsolateExecutor() {
+  _IsolateExecutor() : super._() {
     _start();
   }
 
   @override
   void dispose() {
     if (!_disposed) {
-      _disposed = true;
+      super.dispose();
       _sendPort?.send(null);
       _sendPort = null;
       _stream = null;
@@ -34,14 +54,13 @@ class IsolateExecutor extends Executor {
     }
   }
 
+  @override
   bool hasJobWithDeduplicationKey(Job job) =>
       job.deduplicationKey != null &&
       _jobByKey.values.any(
           (otherJob) => otherJob.job.deduplicationKey == job.deduplicationKey);
 
   @override
-  bool get disposed => _disposed;
-
   int get outstanding => _outstanding;
 
   @override
@@ -51,6 +70,9 @@ class IsolateExecutor extends Executor {
   Future<R> submit<Q, R>(Job<Q, R> job) async {
     if (_disposed) {
       throw CancellationException();
+    }
+    if (_isWorker) {
+      return job.computeFunction(job.value);
     }
     if (!_isReady) {
       await _ready.future;
@@ -100,7 +122,8 @@ class IsolateExecutor extends Executor {
 
   void _start() async {
     final receivePort = ReceivePort();
-    await Isolate.spawn(_executorService, receivePort.sendPort);
+    await Isolate.spawn(_executorService, receivePort.sendPort,
+        debugName: 'executorService${++_executorServiceName}');
     _stream = StreamQueue<dynamic>(receivePort);
     final sendPort = (await _stream!.next) as SendPort;
     _sendPort = sendPort;
@@ -204,10 +227,14 @@ class _Error {
   _Error(this.key, this.error, this.stack);
 }
 
+int _executorServiceName = 0;
+var _isWorker = false;
+
 Future<void> _executorService(SendPort port) async {
   final commandPort = ReceivePort();
   final commandStream = StreamQueue<dynamic>(commandPort);
   try {
+    _isWorker = true;
     port.send(commandPort.sendPort);
 
     while (true) {
@@ -225,8 +252,24 @@ Future<void> _executorService(SendPort port) async {
       }
     }
   } finally {
+    _isWorker = false;
     commandStream.cancel(immediate: true);
     commandPort.close();
   }
   Isolate.exit();
+}
+
+class _InlineExecutor extends IsolateExecutor {
+  _InlineExecutor() : super._();
+
+  @override
+  Future<R> submit<Q, R>(Job<Q, R> job) async {
+    if (_disposed) {
+      throw CancellationException();
+    }
+    return job.computeFunction(job.value);
+  }
+
+  @override
+  List<Future<R>> submitAll<Q, R>(Job<Q, R> job) => [submit(job)];
 }
