@@ -1,3 +1,8 @@
+## 0.3.0
+
+- `PoolExecutor` implements leastcon selection
+- `PoolExecutor` is extensible to use implementations of `Executor` other than `IsolateExecutor`
+
 ## 0.2.1
 
 - support reentrancy

@@ -2,12 +2,13 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:async/async.dart';
+import 'package:executor_lib/src/executor_delegate.dart';
 import 'package:flutter/foundation.dart';
 
 import 'executor.dart';
 
 /// Runs jobs on a single isolate.
-abstract class IsolateExecutor extends Executor {
+abstract class IsolateExecutor extends ExecutorDelegate {
   var _disposed = false;
 
   factory IsolateExecutor() =>
@@ -22,10 +23,6 @@ abstract class IsolateExecutor extends Executor {
   void dispose() {
     _disposed = true;
   }
-
-  bool hasJobWithDeduplicationKey(Job job) => false;
-
-  int get outstanding => 0;
 }
 
 class _IsolateExecutor extends IsolateExecutor {
@@ -272,4 +269,10 @@ class _InlineExecutor extends IsolateExecutor {
 
   @override
   List<Future<R>> submitAll<Q, R>(Job<Q, R> job) => [submit(job)];
+
+  @override
+  bool hasJobWithDeduplicationKey(Job job) => false;
+
+  @override
+  int get outstanding => 0;
 }
