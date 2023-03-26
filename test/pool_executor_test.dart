@@ -1,6 +1,7 @@
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:executor_lib/src/executor.dart';
 import 'package:executor_lib/src/pool_executor.dart';
+import 'package:executor_lib/src/isolate_executor.dart';
 
 void main() {
   var executor = PoolExecutor(concurrency: 3);
@@ -34,6 +35,23 @@ void main() {
       expect(result.length, 3);
       for (final future in result) {
         expect(await future, equals(4));
+      }
+    });
+  });
+
+  group('with delegate', () {
+    test('creates a pool with delegates', () async {
+      var created = 0;
+      final anotherExecutor = PoolExecutor(
+          concurrency: 3,
+          executorFactory: () {
+            ++created;
+            return IsolateExecutor();
+          });
+      try {
+        expect(3, created);
+      } finally {
+        anotherExecutor.dispose();
       }
     });
   });

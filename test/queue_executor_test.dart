@@ -1,4 +1,4 @@
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:executor_lib/src/executor.dart';
 import 'package:executor_lib/src/queue_executor.dart';
 

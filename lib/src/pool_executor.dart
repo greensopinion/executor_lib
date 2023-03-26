@@ -1,16 +1,24 @@
+import 'package:executor_lib/src/executor_delegate.dart';
+
 import 'extensions.dart';
 import 'executor.dart';
 import 'isolate_executor.dart';
+
+typedef ExecutorDelegateFactory = ExecutorDelegate Function();
 
 /// Runs jobs on a pool of isolates. Uses isolate affinity for jobs having the
 /// same deduplication key, otherwise uses round robin to select an isolate.
 class PoolExecutor extends Executor {
   int _index = 0;
-  late final List<IsolateExecutor> _delegates;
+  late final List<ExecutorDelegate> _delegates;
 
-  PoolExecutor({required int concurrency}) {
+  PoolExecutor(
+      {required int concurrency, ExecutorDelegateFactory? executorFactory}) {
     assert(concurrency > 0);
-    _delegates = List.generate(concurrency, (index) => IsolateExecutor());
+    final delegateFactory = executorFactory == null
+        ? (index) => IsolateExecutor()
+        : (index) => executorFactory();
+    _delegates = List.generate(concurrency, delegateFactory);
   }
 
   @override
@@ -37,13 +45,21 @@ class PoolExecutor extends Executor {
     if (affinityDelegate != null) {
       return affinityDelegate;
     }
+    return _leastconDelegate(job);
+  }
+
+  Executor _leastconDelegate(Job job) {
+    ExecutorDelegate? candidate;
     for (int attempt = 0; attempt < _delegates.length; ++attempt) {
       final delegate = _delegates[_nextIndex()];
       if (delegate.outstanding == 0) {
         return delegate;
       }
+      if (candidate == null || candidate.outstanding > delegate.outstanding) {
+        candidate = delegate;
+      }
     }
-    return _delegates[_nextIndex()];
+    return candidate!;
   }
 
   int _nextIndex() {
