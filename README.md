@@ -1,3 +1,5 @@
+# [executor_lib](https://pub.dev/packages/executor_lib)
+
 Provides an abstraction for executing jobs. Features include LIFO order execution, job deduplication, job cancellation, isolates, pooling and queueing.
 
 ## Overview
