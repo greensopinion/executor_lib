@@ -32,6 +32,10 @@ Jobs can be cancelled after they are submitted. This is useful in cases where jo
 
 Jobs running on an isolate can safely create another isolate executor and submit jobs on it. Reentrant jobs run directly on the isolate of the outer executor.
 
+### Leastconn
+
+`PoolExecutor` selects an executor for each job using a combination of round-robin and leastconn to improve utilization and minimize queueing.
+
 ## Development
 
 ### Continuous Integration

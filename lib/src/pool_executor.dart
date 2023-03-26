@@ -45,10 +45,10 @@ class PoolExecutor extends Executor {
     if (affinityDelegate != null) {
       return affinityDelegate;
     }
-    return _leastconDelegate(job);
+    return _leastconnDelegate(job);
   }
 
-  Executor _leastconDelegate(Job job) {
+  Executor _leastconnDelegate(Job job) {
     ExecutorDelegate? candidate;
     for (int attempt = 0; attempt < _delegates.length; ++attempt) {
       final delegate = _delegates[_nextIndex()];

@@ -1,6 +1,6 @@
 ## 1.0.0
 
-- `PoolExecutor` implements leastcon selection
+- `PoolExecutor` implements leastconn selection
 - `PoolExecutor` is extensible to use implementations of `Executor` other than `IsolateExecutor`
 - requires flutter 3.0
 
