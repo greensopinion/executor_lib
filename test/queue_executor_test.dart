@@ -11,6 +11,7 @@ void main() {
 
   tearDown(() {
     _delayValues = [];
+    executor.dispose();
   });
 
   group("executes tasks:", () {

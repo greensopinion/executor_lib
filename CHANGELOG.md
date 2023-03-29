@@ -1,3 +1,6 @@
+## 1.1.0
+
+- add `ConcurrencyExecutor`, an executor that limits concurrency and queues jobs
 ## 1.0.0
 
 - `PoolExecutor` implements leastconn selection
