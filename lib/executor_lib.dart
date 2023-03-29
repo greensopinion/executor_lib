@@ -7,3 +7,4 @@ export 'src/queue_executor.dart';
 export 'src/isolate_executor.dart';
 export 'src/direct_executor.dart';
 export 'src/executor_delegate.dart';
+export 'src/concurrency_executor.dart';
