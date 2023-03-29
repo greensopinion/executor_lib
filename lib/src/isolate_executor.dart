@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:async/async.dart';
-import 'package:executor_lib/src/executor_delegate.dart';
+import 'executor_delegate.dart';
 import 'package:flutter/foundation.dart';
 
 import 'executor.dart';
