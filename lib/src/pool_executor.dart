@@ -1,4 +1,4 @@
-import 'package:executor_lib/src/executor_delegate.dart';
+import 'executor_delegate.dart';
 
 import 'extensions.dart';
 import 'executor.dart';

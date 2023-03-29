@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:executor_lib/executor_lib.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:executor_lib/src/concurrency_executor.dart';
 
 void main() {
   var executor = ConcurrencyExecutor(

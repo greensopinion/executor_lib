@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:executor_lib/executor_lib.dart';
+import 'executor.dart';
 
 /// An executor that limits the number of jobs running concurrently.
 /// Executes jobs in LIFO order, queueing additional jobs once the concurrency
