@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:async/async.dart';
-import 'executor_delegate.dart';
 import 'package:flutter/foundation.dart';
 
 import 'executor.dart';
+import 'executor_delegate.dart';
 
 /// Runs jobs on a single isolate.
 abstract class IsolateExecutor extends ExecutorDelegate {
