@@ -1,7 +1,6 @@
-import 'executor_delegate.dart';
-
-import 'extensions.dart';
 import 'executor.dart';
+import 'executor_delegate.dart';
+import 'extensions.dart';
 import 'isolate_executor.dart';
 
 typedef ExecutorDelegateFactory = ExecutorDelegate Function();
