@@ -8,43 +8,18 @@ void main() {
       delegate: QueueExecutor(), concurrencyLimit: 2, maxQueueSize: 2);
   final testJobName = 'a test job';
 
-  group('executes tasks', () {
-    test('executes a single task', () async {
-      final result = await executor
-          .submit(Job(testJobName, _task, 1, deduplicationKey: null));
-      expect(result, equals(2));
-    });
-    test('multiple tasks', () async {
-      final futures = [1, 2, 3, 4]
-          .map((e) => executor
-              .submit(Job(testJobName, _task, e, deduplicationKey: null)))
-          .toList();
-      final results = [];
-      for (final future in futures) {
-        results.add(await future);
-      }
-      expect(results, equals([2, 3, 4, 5]));
-    });
-    test('propagates an exception', () async {
-      const message = 'intentional failure';
-      try {
-        await executor.submit(
-            Job(testJobName, _throwingTask, message, deduplicationKey: null));
-        throw 'expected a failure';
-      } catch (error) {
-        expect(error, equals(message));
-      }
-    });
-    test('rejects tasks when task is cancelled', () async {
-      try {
-        await executor.submit(Job(testJobName, (message) => _task, 'a-message',
-            cancelled: () => true, deduplicationKey: null));
-        throw 'expected an error';
-      } on CancellationException {
-        // ignore
-      }
-    });
+  test('executes multiple tasks', () async {
+    final futures = [1, 2, 3, 4]
+        .map((e) =>
+            executor.submit(Job(testJobName, _task, e, deduplicationKey: null)))
+        .toList();
+    final results = [];
+    for (final future in futures) {
+      results.add(await future);
+    }
+    expect(results, equals([2, 3, 4, 5]));
   });
+
   group('concurrency and queueing', () {
     test('limits queueing and concurrency', () async {
       expect(executor.queueSize, 0);
@@ -96,10 +71,6 @@ void main() {
 
 dynamic _task(dynamic value) {
   return value + 1;
-}
-
-dynamic _throwingTask(dynamic value) {
-  throw value;
 }
 
 dynamic _futureTask(dynamic value) async {

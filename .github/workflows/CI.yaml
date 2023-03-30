@@ -30,4 +30,4 @@ jobs:
         run: flutter analyze
 
       - name: Run tests
-        run: flutter test -r expanded
+        run: flutter test --concurrency=1 -r expanded

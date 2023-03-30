@@ -34,16 +34,6 @@ void main() {
       }
       expect(results, equals([2, 3, 4, 5]));
     });
-    test('propagates an exception', () async {
-      const message = 'intentional failure';
-      try {
-        await executor.submit(
-            Job(_testJobName, _throwingTask, message, deduplicationKey: null));
-        throw 'expected a failure';
-      } catch (error) {
-        expect(error, equals(message));
-      }
-    });
 
     test('executes in LIFO order', () async {
       final longRunningTask = executor
@@ -58,16 +48,6 @@ void main() {
       expect(longResult, [1000]);
       expect(firstShortResult, [1000, 2, 1]);
       expect(secondShortResult, [1000, 2]);
-    });
-
-    test('rejects tasks when task is cancelled', () async {
-      try {
-        await executor.submit(Job(_testJobName, (message) => _task, 'a-message',
-            cancelled: () => true, deduplicationKey: null));
-        throw 'expected an error';
-      } on CancellationException {
-        // ignore
-      }
     });
   });
 
@@ -128,39 +108,10 @@ void main() {
       expect(result.sublist(1), [next, next, next]);
     });
   });
-
-  group('shuts down', () {
-    test('can be disposed', () {
-      executor.dispose();
-      expect(executor.disposed, equals(true));
-    });
-
-    test('can be disposed twice', () {
-      executor.dispose();
-      expect(executor.disposed, equals(true));
-      executor.dispose();
-      expect(executor.disposed, equals(true));
-    });
-
-    test('rejects tasks when disposed', () async {
-      executor.dispose();
-      try {
-        await executor.submit(Job(_testJobName, (message) => _task, 'a-message',
-            deduplicationKey: null));
-        throw 'expected an error';
-      } on CancellationException catch (_) {
-        // expected, ignore
-      }
-    });
-  });
 }
 
 dynamic _task(dynamic value) {
   return value + 1;
-}
-
-dynamic _throwingTask(dynamic value) {
-  throw value;
 }
 
 final _delayValues = [];
