@@ -1,6 +1,8 @@
 ## 1.1.0
 
 - add `ConcurrencyExecutor`, an executor that limits concurrency and queues jobs
+- add `ImmediateExecutor`, an executor that starts tasks immediately when submitted
+
 ## 1.0.0
 
 - `PoolExecutor` implements leastconn selection
