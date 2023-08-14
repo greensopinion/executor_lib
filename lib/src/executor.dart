@@ -48,6 +48,9 @@ abstract class Executor {
 /// thrown when a job is cancelled
 class CancellationException implements Exception {
   CancellationException();
+
+  @override
+  String toString() => 'Cancelled';
 }
 
 /// Creates a new executor with the given concurrency. Uses

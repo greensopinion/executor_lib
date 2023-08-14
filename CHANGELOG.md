@@ -1,3 +1,7 @@
+## 1.1.1
+
+- add `toString` to `CancellationException` to improve observability in obfuscated code
+
 ## 1.1.0
 
 - add `ConcurrencyExecutor`, an executor that limits concurrency and queues jobs
