@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'executor.dart';
+import 'executor_delegate.dart';
 
 /// An executor that limits the number of jobs running concurrently.
 /// Executes jobs in LIFO order, queueing additional jobs once the concurrency
 /// limit is reached. If the maximum queue size is reached, oldest jobs are
 /// completed with a [CancellationException].
-class ConcurrencyExecutor extends Executor {
+class ConcurrencyExecutor extends ExecutorDelegate {
   /// The delegate used to execute jobs
   final Executor delegate;
 
@@ -20,6 +21,7 @@ class ConcurrencyExecutor extends Executor {
 
   int _inProgress = 0;
   final _queue = <_InternalJob>[];
+  final _executing = <_InternalJob>[];
 
   ConcurrencyExecutor(
       {required this.delegate,
@@ -67,16 +69,28 @@ class ConcurrencyExecutor extends Executor {
 
   void _startJob(_InternalJob internalJob) {
     ++_inProgress;
+    _executing.add(internalJob);
     delegate
         .submit(internalJob.job)
         .then((value) => internalJob.completer.complete(value))
         .onError((error, stackTrace) =>
             internalJob.completer.completeError(error ?? '', stackTrace))
         .whenComplete(() {
+      _executing.remove(internalJob);
       --_inProgress;
       _startJobs();
     });
   }
+
+  @override
+  bool hasJobWithDeduplicationKey(Job job) =>
+      job.deduplicationKey != null &&
+      (_queue.any((j) => j.job.deduplicationKey == job.deduplicationKey) ||
+          _executing
+              .any((j) => j.job.deduplicationKey == job.deduplicationKey));
+
+  @override
+  int get outstanding => _executing.length + _queue.length;
 }
 
 class _InternalJob<Q, R> {

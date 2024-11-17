@@ -1,3 +1,7 @@
+## 1.1.2
+
+- enable use of `ConcurrencyExecutor` with `ExecutorDelegate`
+
 ## 1.1.1
 
 - add `toString` to `CancellationException` to improve observability in obfuscated code
